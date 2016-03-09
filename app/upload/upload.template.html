@@ -17,9 +17,16 @@
 				</td>
 			</tr>
 			<tr>
-				<td class="text-right tdBold">NFO</td>
+				<td class="text-right tdBold">Description</td>
 				<td class="text-left">
 					<textarea class="form-control" ng-model="vm.settings.nfo" on-paste-text="vm.stripNfo()" rows="12"></textarea>
+				</td>
+			</tr>
+			<tr>
+				<td class="text-right tdBold">Tech Info *</td>
+				<td class="text-left">
+					<textarea class="form-control" ng-model="vm.settings.techInfo" rows="12"></textarea>
+<br><i>Paste the output of <a href="http://mediainfo.sourceforge.net/en">MediaInfo</a> in here and the site will write the technical information for you.</i><br><i>In mediainfo click the view menu &gt; text &gt; right click in the box &gt; select all &gt; copy &gt; paste into this box.</i><br><i>Please make sure you use the latest version of <a href="http://mediainfo.sourceforge.net/en">MediaInfo</a>.<br><b>Please do not use for Blu-rays.</b></i>
 				</td>
 			</tr>
 			<tr>
@@ -40,6 +47,13 @@
 					<select class="form-control" ng-model="vm.settings.Mediums" ng-options="i.id as i.text for i in ::vm.Mediums">
 					</select>
 					</div>
+				<div class="col-xs-6 col-md-3">	
+					Origin:
+					<select class="form-control" ng-model="vm.settings.Origin">
+						<option value="0" ng-selected="selected">Undefined</option>
+						<option value="1">Internal</option>
+					</select>
+					</div>					
 				</td>
 			</tr>
 			<tr ng-show="vm.settings.category == 8">
@@ -79,6 +93,14 @@
 					</div>
 				</td>
 			</tr>
+			<tr>
+				<td class="text-right tdBold alignMiddle">TVDB ID</td>
+				<td class="text-left">
+					<div class="input-group" style="width: 100%">
+						<input type="text" class="form-control" style="width: 50%" ng-model="vm.settings.tvdbId"/>
+					</div>
+				</td>
+			</tr>			
 			<tr>
 				<td class="text-right tdBold alignMiddle">Anonymous</td>
 				<td class="text-left">

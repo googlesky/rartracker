@@ -28,6 +28,9 @@
 			programDate: this.tvDates[0],
 			programTime: '12:00',
 			movieData: null,
+			tvdbId:'',
+			techInfo:'',
+			Origin: '0',
 		};
 
 		if ($stateParams.requestId) {
@@ -159,6 +162,10 @@
 					swesub:				this.settings.swesub || 0,
 					programTitle:		this.settings.programTitle,
 					programDate:		this.settings.programDate + ' ' + this.settings.programTime,
+					tvdbId: 			this.settings.tvdbId,
+					techInfo: 			this.settings.techInfo,
+					Origin: 			this.settings.Origin,
+
 				}
 			};
 
