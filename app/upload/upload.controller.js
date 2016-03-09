@@ -5,10 +5,12 @@
 		.module('app.shared')
 		.controller('UploadController', UploadController);
 
-	function UploadController($state, $stateParams, user, userClasses, categories, SweTvResource, uploadService, MovieDataResource) {
+	function UploadController($state, $stateParams, user, userClasses, categories, SweTvResource, uploadService, MovieDataResource, Codecs, Mediums) {
 
 		this.currentUser = user;
 		this.categories = categories;
+		this.Codecs = Codecs;
+		this.Mediums = Mediums;
 		this.tvChannels = SweTvResource.Channels.query();
 		this.tvDates = uploadService.getSweTvDates();
 

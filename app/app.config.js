@@ -3,7 +3,7 @@
 
 	var configs = {
 		STATUS_CHECK_TIMER_LIMIT_MINUTES: 60 * 24,
-		SITE_URL: 'http://127.0.0.1:1332/',
+		SITE_URL: 'http://5.189.161.54/',
 		API_BASE_URL: '/api/v1/',
 		SUGGESTIONS_FORUM_ID: 25,
 	};
@@ -20,22 +20,29 @@
 	};
 
 	var categories = {
-		DVDR_PAL:			{id: 1, text: 'DVDR PAL'},
-		DVDR_CUSTOM:		{id: 2, text: 'DVDR CUSTOM'},
-		DVDR_TV:			{id: 3, text: 'DVDR TV'},
-		MOVIE_720P:			{id: 4, text: '720p Film'},
-		MOVIE_1080P:		{id: 5, text: '1080p Film'},
-		TV_720P: 			{id: 6, text: '720p TV'},
-		TV_1080P:			{id: 7, text: '1080p TV'},
-		TV_SWE:				{id: 8, text: 'Svensk TV'},
-		AUDIOBOOKS:			{id: 9, text: 'Ljudböcker'},
-		EBOOKS:				{id: 10, text: 'E-böcker'},
-		EPAPERS:			{id: 11, text: 'E-tidningar'},
-		MUSIC:				{id: 12, text: 'Musik'},
-		BLURAY:				{id: 13, text: 'Full BluRay'},
-		SUBPACK:			{id: 14, text: 'Subpack'},
-		MOVIE_4K:			{id: 15, text: '4K Film'}
+		AudioTrack:			{id: 6, text: 'Audio Track'},
+		Documentary:		{id: 3, text: 'Documentary'},
+		Misc_Demo:			{id: 8, text: 'Misc/Demo'},
+		Movie:				{id: 1, text: 'Movie'},
+		Music:				{id: 4, text: 'Music'},
+		Sport:	 			{id: 5, text: 'Sport'},
+		TV:					{id: 2, text: 'TV'},
+		XXX:				{id: 7, text: 'XXX'},
 	};
+
+	var Codecs = {
+		H264:				{id: 1, text: 'H.264'},
+		MPEG2:				{id: 2, text: 'MPEG-2'},
+		VC1:				{id: 3, text: 'VC-1'},
+		XviD:				{id: 4, text: 'XviD'},
+	};
+	var Mediums = {
+		Bluray:				{id: 1, text: 'Blu-ray/HD DVD'},
+		Capture:			{id: 4, text: 'Capture'},
+		Encode:				{id: 3, text: 'Encode'},
+		Remux:				{id: 5, text: 'Remux'},
+		WEBDL:				{id: 6, text: 'WEB-DL'},
+	};	
 
 	var cssDesigns = {
 		STANDARD:			{ id: 0, text: 'Standard'},
@@ -43,8 +50,10 @@
 		CUSTOM_EXTERNAL:	{ id: 1, text: 'Anpassad extern CSS'},
 	};
 
+
+	
 	function AppConfig($stateProvider, $urlRouterProvider, $locationProvider, $compileProvider) {
-		$compileProvider.debugInfoEnabled(false);
+		$compileProvider.debugInfoEnabled(true);
 		$urlRouterProvider.otherwise('/');
 		$locationProvider.html5Mode(true);
 	}
@@ -76,6 +85,8 @@
 		.constant('configs', configs)
 		.constant('userClasses', userClasses)
 		.constant('categories', categories)
+		.constant('Codecs', Codecs)
+		.constant('Mediums', Mediums)
 		.constant('cssDesigns', cssDesigns)
 		.config(AppConfig)
 		.factory('resourceExtension', ResourceExtension)

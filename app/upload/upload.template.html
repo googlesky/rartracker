@@ -1,14 +1,14 @@
 <div ng-show="vm.currentUser.uploadban == 'yes'" class="alert alert-warning" role="alert">Du är bannad ifrån att kunna ladda upp torrents.</div>
 
 <div class="text-center" ng-show="vm.currentUser.uploadban == 'no'">
-	<h2 ng-if="vm.settings.reqid < 3">Ladda upp torrent</h2>
-	<h2 ng-if="vm.settings.reqid > 3">Ladda upp request: {{ vm.settings.request }}</h2>
+	<h2 ng-if="vm.settings.reqid < 3">Upload torrent</h2>
+	<h2 ng-if="vm.settings.reqid > 3">Upload request: {{ vm.settings.request }}</h2>
 
 	<div class="col-md-9 col-centered">
 	<form role="form" ng-submit="vm.uploadFile()" enctype="multipart/form-data">
 		<table class="table table-striped" cellpadding="15">
 			<tr>
-				<td style="width: 150px;" class="text-right tdBold alignMiddle">Välj .torrent-fil</td>
+				<td style="width: 150px;" class="text-right tdBold alignMiddle">Select .torrent file</td>
 				<td class="text-left">
 					<div class="input-group">
 						<input type="file" class="form-control ff" file-model="vm.settings.file" file-changed="vm.fileChanged()" />
@@ -23,10 +23,23 @@
 				</td>
 			</tr>
 			<tr>
-				<td class="text-right tdBold alignMiddle">Kategori</td>
+				<td class="text-right tdBold alignMiddle">Type*</td>
 				<td class="text-left">
+				<div class="col-xs-6 col-md-3">
+				Category: 
 					<select class="form-control" ng-change="vm.categoryChanged()" ng-model="vm.settings.category" ng-options="i.id as i.text for i in ::vm.categories">
 					</select>
+				</div>
+				<div class="col-xs-6 col-md-3">
+					Codec: 
+					<select class="form-control" ng-model="vm.settings.Codecs" ng-options="i.id as i.text for i in ::vm.Codecs">
+					</select>
+					</div>
+				<div class="col-xs-6 col-md-3">	
+					Medium: 
+					<select class="form-control" ng-model="vm.settings.Mediums" ng-options="i.id as i.text for i in ::vm.Mediums">
+					</select>
+					</div>
 				</td>
 			</tr>
 			<tr ng-show="vm.settings.category == 8">
@@ -53,7 +66,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td class="text-right tdBold alignMiddle">IMDb-länk</td>
+				<td class="text-right tdBold alignMiddle">IMDb-link</td>
 				<td class="text-left">
 					<div class="input-group" style="width: 100%">
 						<input type="text" class="form-control" style="width: 50%" ng-model="vm.settings.imdbUrl" placeholder="http://" ng-change="vm.fetchImdbInfo()"/>
@@ -67,7 +80,7 @@
 				</td>
 			</tr>
 			<tr>
-				<td class="text-right tdBold alignMiddle">Anonym</td>
+				<td class="text-right tdBold alignMiddle">Anonymous</td>
 				<td class="text-left">
 					<div class="btn-group">
 						<label class="btn btn-default" ng-model="vm.settings.anonymousUpload" uib-btn-radio="1">Ja</label>
@@ -114,7 +127,7 @@
 		<div ng-show="vm.settings.nfo.length > 2 && vm.settings.file && !vm.settings.imdbId && vm.isMoveOrTvSeries()" class="alert alert-warning" role="alert">IMDB-länk saknas! Försök gärna lägga in IMDB-länk manuellt innan du laddar upp, om det finns.</div>
 
 		<div class="text-center">
-			<button type="submit" class="btn btn-primary" ng-disabled="vm.submitDisabled">Ladda upp torrent</button>
+			<button type="submit" class="btn btn-primary" ng-disabled="vm.submitDisabled">Upload torrent</button>
 		</div>
 	</form>
 	</div>
