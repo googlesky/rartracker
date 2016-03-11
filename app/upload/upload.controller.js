@@ -5,10 +5,12 @@
 		.module('app.shared')
 		.controller('UploadController', UploadController);
 
-	function UploadController($state, $stateParams, user, userClasses, categories, SweTvResource, uploadService, MovieDataResource) {
+	function UploadController($state, $stateParams, user, userClasses, categories, SweTvResource, uploadService, MovieDataResource, Codecs, Mediums) {
 
 		this.currentUser = user;
 		this.categories = categories;
+		this.Codecs = Codecs;
+		this.Mediums = Mediums;
 		this.tvChannels = SweTvResource.Channels.query();
 		this.tvDates = uploadService.getSweTvDates();
 
@@ -26,6 +28,9 @@
 			programDate: this.tvDates[0],
 			programTime: '12:00',
 			movieData: null,
+			tvdbId:'',
+			techInfo:'',
+			Origin: '0',
 		};
 
 		if ($stateParams.requestId) {
@@ -157,6 +162,10 @@
 					swesub:				this.settings.swesub || 0,
 					programTitle:		this.settings.programTitle,
 					programDate:		this.settings.programDate + ' ' + this.settings.programTime,
+					tvdbId: 			this.settings.tvdbId,
+					techInfo: 			this.settings.techInfo,
+					Origin: 			this.settings.Origin,
+
 				}
 			};
 
