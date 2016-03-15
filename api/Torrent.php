@@ -742,8 +742,8 @@ class Torrent {
 		$stereoscopic = 0;
 		//
 		$NfoFile = "";
-		if($_FILE['NfoFile'] && $_FILE['NfoFile']['tmp_name']){
-			$NfoFile = file_get_contents($_FILE['NfoFile']['tmp_name']);
+		if($_FILES['NfoFile'] && $_FILES['NfoFile']['tmp_name']){
+			$NfoFile = file_get_contents($_FILES['NfoFile']['tmp_name']);
 		}
 		$tvdbId=$post["tvdbId"];
 		$techInfo=$post["techInfo"];
