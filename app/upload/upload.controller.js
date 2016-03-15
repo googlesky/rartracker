@@ -31,6 +31,8 @@
 			tvdbId:'',
 			techInfo:'',
 			Origin: '0',
+			AniDBID:'',
+			torrentName:'',
 		};
 
 		if ($stateParams.requestId) {
@@ -105,6 +107,7 @@
 	 	};
 
 	 	this.fileChanged = function () {
+			this.settings.torrentName = this.settings.file.name;
 	 		this.settings.category = uploadService.guessCategoryFromName(this.settings.file.name);
 			if (this.settings.category == categories.TV_SWE.id) {
 				this.guessSweTv();
@@ -165,6 +168,11 @@
 					tvdbId: 			this.settings.tvdbId,
 					techInfo: 			this.settings.techInfo,
 					Origin: 			this.settings.Origin,
+					Mediums: 			this.settings.Mediums,
+					Codecs: 			this.settings.Codecs,
+					AniDBID: 			this.settings.AniDBID,
+					NfoFile: 			'',
+					torrentName: 		this.settings.torrentName,
 
 				}
 			};

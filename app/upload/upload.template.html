@@ -1,14 +1,14 @@
-<div ng-show="vm.currentUser.uploadban == 'yes'" class="alert alert-warning" role="alert">Du är bannad ifrån att kunna ladda upp torrents.</div>
+<div ng-show="vm.currentUser.uploadban == 'yes'" class="alert alert-warning" role="alert">You can't upload new torrent.</div>
 
 <div class="text-center" ng-show="vm.currentUser.uploadban == 'no'">
 	<h2 ng-if="vm.settings.reqid < 3">Upload torrent</h2>
 	<h2 ng-if="vm.settings.reqid > 3">Upload request: {{ vm.settings.request }}</h2>
 
-	<div class="col-md-9 col-centered">
+	<div class="col-md-12 col-centered">
 	<form role="form" ng-submit="vm.uploadFile()" enctype="multipart/form-data">
 		<table class="table table-striped" cellpadding="15">
 			<tr>
-				<td style="width: 150px;" class="text-right tdBold alignMiddle">Select .torrent file</td>
+				<td style="width: 150px;" class="text-right tdBold alignMiddle">Torrent file *</td>
 				<td class="text-left">
 					<div class="input-group">
 						<input type="file" class="form-control ff" file-model="vm.settings.file" file-changed="vm.fileChanged()" />
@@ -17,9 +17,19 @@
 				</td>
 			</tr>
 			<tr>
+				<td class="text-right tdBold alignMiddle">Torrent name</td>
+				<td class="text-left">
+					<div class="input-group" style="width: 100%">
+						<input type="text" class="form-control" ng-model="vm.settings.torrentName"/>
+					</div>
+					See rules on torrent naming 
+				</td>
+			</tr>
+			<tr>
 				<td class="text-right tdBold">Description</td>
 				<td class="text-left">
 					<textarea class="form-control" ng-model="vm.settings.nfo" on-paste-text="vm.stripNfo()" rows="12"></textarea>
+					<span class="italic" id="screens_note">2 or more full-size, full-color, untouched PNG screenshots must be added as thumbnails in the description (at least 4 for season packs).</span>
 				</td>
 			</tr>
 			<tr>
@@ -35,16 +45,19 @@
 				<div class="col-xs-6 col-md-3">
 				Category: 
 					<select class="form-control" ng-change="vm.categoryChanged()" ng-model="vm.settings.category" ng-options="i.id as i.text for i in ::vm.categories">
+					<option value='' disabled>(choose one)</option>
 					</select>
 				</div>
 				<div class="col-xs-6 col-md-3">
 					Codec: 
 					<select class="form-control" ng-model="vm.settings.Codecs" ng-options="i.id as i.text for i in ::vm.Codecs">
+					<option value='' disabled>(choose one)</option>
 					</select>
 					</div>
 				<div class="col-xs-6 col-md-3">	
 					Medium: 
 					<select class="form-control" ng-model="vm.settings.Mediums" ng-options="i.id as i.text for i in ::vm.Mediums">
+					<option value='' disabled>(choose one)</option>
 					</select>
 					</div>
 				<div class="col-xs-6 col-md-3">	
@@ -54,6 +67,16 @@
 						<option value="1">Internal</option>
 					</select>
 					</div>					
+				</td>
+			</tr>
+			<tr>
+				<td style="width: 150px;" class="text-right tdBold alignMiddle">Nfo file</td>
+				<td class="text-left">
+					<div class="input-group">
+						<input type="file" class="form-control ff" file-model="vm.settings.Nfofile" />
+						<span class="input-group-addon" id="basic-addon2">{{ vm.settings.Nfofile.size | prettysize }}</span>
+					</div>
+					<strong>(Not required.)</strong>
 				</td>
 			</tr>
 			<tr ng-show="vm.settings.category == 8">
