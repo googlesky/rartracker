@@ -107,7 +107,9 @@
 	 	};
 
 	 	this.fileChanged = function () {
-			this.settings.torrentName = this.settings.file.name;
+            if(this.settings.torrentName=="") {
+                this.settings.torrentName = this.settings.file.name.slice(0, this.settings.file.name.length - 8);
+            }
 	 		this.settings.category = uploadService.guessCategoryFromName(this.settings.file.name);
 			if (this.settings.category == categories.TV_SWE.id) {
 				this.guessSweTv();
@@ -117,6 +119,8 @@
 				this.guessImdbFromName();
 			}
 		};
+
+        this.NfofileChanged=function(){};
 
 	 	this.fetchImdbInfo = function () {
 	 		if (this.settings.imdbUrl.length > 1) {

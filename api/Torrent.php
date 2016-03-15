@@ -931,8 +931,8 @@ class Torrent {
 			foreach($foundBanned as $f)
 				$files .= '\''.$f. '\', ';
 
-			$this->adminlog->create("[b]".$this->user->getUsername()."[/b] försökte ladda upp [i]".$name."[/i] innehållandes otllåtna skräpfil(er): [b]".$files."[/b].");
-			throw new Exception("Din torrent innehåller följande otillåtna skräpfiler: [b]".$files);
+			$this->adminlog->create("[b]".$this->user->getUsername()."[/b] trying to upload [i]".$name."[/i] contains the following unauthorized junk files: [b]".$files."[/b].");
+			throw new Exception("Your torrent contains the following unauthorized junk files: [b]".$files."[/b].");
 		}
 
 		if(($txt = $this->detectMissingFiles($filelist)) != false) {
