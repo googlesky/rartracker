@@ -5,4 +5,8 @@
 /bower_components/
 /dist/
 /api/secrets.php
+<<<<<<< HEAD
 /api/libs/
+=======
+/api/Config.php
+>>>>>>> ffa43f3c8ef8c8ff879fb9c962fe62226dda20e7
