@@ -171,7 +171,7 @@
 					Mediums: 			this.settings.Mediums,
 					Codecs: 			this.settings.Codecs,
 					AniDBID: 			this.settings.AniDBID,
-					NfoFile: 			'',
+					NfoFile: 			this.settings.NfoFile,
 					torrentName: 		this.settings.torrentName,
 				}
 			};
