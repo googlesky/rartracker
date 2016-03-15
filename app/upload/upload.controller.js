@@ -20,7 +20,6 @@
 			category: 1,
 			p2p: 0,
 			swesub: 0,
-			sweaudio: 0,
 			nfo: '',
 			progress: 0,
 			imdbId: 0,
@@ -110,11 +109,6 @@
 	 	this.fileChanged = function () {
 			this.settings.torrentName = this.settings.file.name;
 	 		this.settings.category = uploadService.guessCategoryFromName(this.settings.file.name);
-			if (this.settings.category !== 8 && this.settings.file.name.toLowerCase().indexOf('swedish') > -1) {
-				this.settings.sweaudio = 1;
-			} else {
-				this.settings.sweaudio = 0;
-			}
 			if (this.settings.category == categories.TV_SWE.id) {
 				this.guessSweTv();
 			}
@@ -169,7 +163,6 @@
 					channel:			this.settings.channel || 0,
 					p2p:				this.settings.p2p || 0,
 					swesub:				this.settings.swesub || 0,
-					sweaudio:			this.settings.sweaudio || 0,
 					programTitle:		this.settings.programTitle,
 					programDate:		this.settings.programDate + ' ' + this.settings.programTime,
 					tvdbId: 			this.settings.tvdbId,
@@ -180,7 +173,6 @@
 					AniDBID: 			this.settings.AniDBID,
 					NfoFile: 			'',
 					torrentName: 		this.settings.torrentName,
-
 				}
 			};
 
