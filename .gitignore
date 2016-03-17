@@ -6,4 +6,5 @@
 /dist/
 /api/secrets.php
 /api/libs/
+/api/MovieTV.php
 

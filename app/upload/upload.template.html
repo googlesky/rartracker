@@ -116,20 +116,42 @@
 					</div>
 				</td>
 			</tr>
-			<tr>
-				<td class="text-right tdBold alignMiddle">TVDB ID</td>
-				<td class="text-left">
-					<div class="input-group" style="width: 100%">
-						<input type="text" class="form-control" style="width: 50%" ng-model="vm.settings.tvdbId"/>
-					</div>
-				</td>
-			</tr>			
+            <tr>
+                <td class="text-right tdBold alignMiddle">TVDB</td>
+                <td class="text-left">
+                    <div class="input-group">
+
+                        <div class="col-lg-3">
+                            <div class="input-group">
+                                <span class="input-group-addon">ID</span>
+                                <input type="text" class="form-control" style="width: 140px" ng-model="vm.settings.tvdbId"/>
+                            </div></div>
+                        <div class="col-lg-4">
+                            <div class="input-group">
+                                <span class="input-group-addon">Season</span>
+                                <input type="text" class="form-control" style="width: 140px" ng-model="vm.settings.tvdb_season"/>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="input-group">
+                                <span class="input-group-addon">Episode</span>
+                                <input type="text" class="form-control" style="width: 140px" ng-model="vm.settings.tvdb_episode"/>
+
+                            </div>
+                        </div>
+                        <div class="col-lg-1">
+                            <button type="button" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+
+                </td>
+            </tr>
 			<tr>
 				<td class="text-right tdBold alignMiddle">Anonymous</td>
 				<td class="text-left">
 					<div class="btn-group">
-						<label class="btn btn-default" ng-model="vm.settings.anonymousUpload" uib-btn-radio="1">Ja</label>
-						<label class="btn btn-default" ng-model="vm.settings.anonymousUpload" uib-btn-radio="0">Nej</label>
+						<label class="btn btn-default" ng-model="vm.settings.anonymousUpload" uib-btn-radio="1">Yes</label>
+						<label class="btn btn-default" ng-model="vm.settings.anonymousUpload" uib-btn-radio="0">No</label>
 					</div>
 				</td>
 			</tr>

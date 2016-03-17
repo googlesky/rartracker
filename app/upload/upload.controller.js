@@ -33,6 +33,8 @@
 			Origin: '0',
 			AniDBID:'',
 			torrentName:'',
+            tvdb_season:'',
+            tvdb_episode:''
 		};
 
 		if ($stateParams.requestId) {
@@ -177,6 +179,9 @@
 					AniDBID: 			this.settings.AniDBID,
 					NfoFile: 			this.settings.NfoFile,
 					torrentName: 		this.settings.torrentName,
+                    tvdb_episode:       this.settings.tvdb_episode,
+                    tvdb_season:       this.settings.tvdb_season,
+
 				}
 			};
 
