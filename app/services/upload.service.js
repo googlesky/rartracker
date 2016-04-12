@@ -139,7 +139,7 @@
 
 			result.push({
 				id: 1,
-				program: ' -- Fyll i ett program manuellt --'
+				program: ' - Fill in an application manually -'
 			});
 
 			var lastDate = '';

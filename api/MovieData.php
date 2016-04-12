@@ -79,6 +79,11 @@ class MovieData {
 	    return $arrMatches;
 	}
 
+	/**
+	 * @param $url
+	 * @return mixed
+	 * @throws Exception
+     */
 	private function fetchImdbData($url) {
 
 		// Decides what language the IMDB titles should be fetched in.

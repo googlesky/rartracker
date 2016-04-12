@@ -20,7 +20,6 @@
 			category: 1,
 			p2p: 0,
 			swesub: 0,
-			sweaudio: 0,
 			nfo: '',
 			progress: 0,
 			imdbId: 0,
@@ -32,6 +31,10 @@
 			tvdbId:'',
 			techInfo:'',
 			Origin: '0',
+			AniDBID:'',
+			torrentName:'',
+            tvdb_season:'',
+            tvdb_episode:''
 		};
 
 		if ($stateParams.requestId) {
@@ -106,12 +109,10 @@
 	 	};
 
 	 	this.fileChanged = function () {
+            if(this.settings.torrentName=="") {
+                this.settings.torrentName = this.settings.file.name.slice(0, this.settings.file.name.length - 8);
+            }
 	 		this.settings.category = uploadService.guessCategoryFromName(this.settings.file.name);
-			if (this.settings.category !== 8 && this.settings.file.name.toLowerCase().indexOf('swedish') > -1) {
-				this.settings.sweaudio = 1;
-			} else {
-				this.settings.sweaudio = 0;
-			}
 			if (this.settings.category == categories.TV_SWE.id) {
 				this.guessSweTv();
 			}
@@ -120,6 +121,8 @@
 				this.guessImdbFromName();
 			}
 		};
+
+        this.NfofileChanged=function(){};
 
 	 	this.fetchImdbInfo = function () {
 	 		if (this.settings.imdbUrl.length > 1) {
@@ -166,12 +169,18 @@
 					channel:			this.settings.channel || 0,
 					p2p:				this.settings.p2p || 0,
 					swesub:				this.settings.swesub || 0,
-					sweaudio:			this.settings.sweaudio || 0,
 					programTitle:		this.settings.programTitle,
 					programDate:		this.settings.programDate + ' ' + this.settings.programTime,
 					tvdbId: 			this.settings.tvdbId,
 					techInfo: 			this.settings.techInfo,
 					Origin: 			this.settings.Origin,
+					Mediums: 			this.settings.Mediums,
+					Codecs: 			this.settings.Codecs,
+					AniDBID: 			this.settings.AniDBID,
+					NfoFile: 			this.settings.NfoFile,
+					torrentName: 		this.settings.torrentName,
+                    tvdb_episode:       this.settings.tvdb_episode,
+                    tvdb_season:       this.settings.tvdb_season,
 
 				}
 			};

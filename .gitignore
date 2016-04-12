@@ -5,4 +5,6 @@
 /bower_components/
 /dist/
 /api/secrets.php
-/api/Config.php
+/api/libs/
+/api/MovieTV.php
+/test.php

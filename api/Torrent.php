@@ -12,8 +12,19 @@ class Torrent {
 	private $adminlog;
 	private $torrentDir = "../torrents/";
 	private $subsDir = "../subs/";
-	public static $torrentFieldsUser = array('torrents.id', 'name', 'category', 'size', 'torrents.added', 'type', 'numfiles', 'comments', 'times_completed', 'leechers', 'seeders', 'reqid', 'torrents.frileech', 'torrents.imdbid', 'p2p', 'swesub', 'sweaudio', 'pack', '3d');
+	public static $torrentFieldsUser = array('torrents.id', 'name', 'category', 'size', 'torrents.added', 'type', 'numfiles', 'comments', 'times_completed', 'leechers', 'seeders', 'reqid', 'torrents.frileech', 'torrents.imdbid', 'p2p', 'swesub', 'pack', '3d');
 
+	///
+	const AudioTrack = 6;
+	const Documentary = 3;
+	const Misc_Demo = 8;
+	const Movie = 1;
+	const Music = 4;
+	const Sport = 5;
+	const TV = 2;
+	const XXX = 7;
+	///
+	
 	const DVDR_PAL = 1;
 	const DVDR_CUSTOM = 2;
 	const DVDR_TV = 3;
@@ -42,28 +53,28 @@ class Torrent {
 		$this->subtitles = $subtitles;
 	}
 
-	public function search($params) {
-		$limit = (int) $params["limit"];
+	public function search($categories = null, $section = null, $index = 0, $limit, $sort = null, $order = null, $searchText = '', $hideOld = false, $p2p = null, $multiSearch = false, $watch = false) {
+		$limit = (int) $limit;
 		if (!$limit) {
 			$limit = 20;
 		}
 
-		$index = (int) $params["index"];
+		$index = (int) $index;
 		if (!$index) {
 			$index = 0;
 		}
 
 		$catStr = "";
-		if ($params["categories"]) {
+		if ($categories != null) {
 
-			foreach($params["categories"] as &$cat) {
+			foreach($categories as &$cat) {
 				$cat = (int) $cat;
 			}
 
-			$catStr = implode($params["categories"], ',');
+			$catStr = implode($categories, ',');
 		}
 
-		switch ($params["sort"]) {
+		switch ($sort) {
 			case 'c': $sortColumn = 'torrents.comments'; break;
 			case 's': $sortColumn = 'torrents.size'; break;
 			case 'n': $sortColumn = 'torrents.name'; break;
@@ -74,66 +85,57 @@ class Torrent {
 			default: $sortColumn = 'torrents.id';
 		}
 
-		if ($params["order"] == "asc") {
+		if ($order == "asc") {
 			$order = "ASC";
 		} else {
 			$order = "DESC";
 		}
 
 		$where = [];
-		if (strlen($params["searchText"]) > 0) {
+		if (strlen($searchText) > 0) {
 
-			$searchWords = Helper::searchTextToWordParams($params["searchText"]);
+			$searchWords = Helper::searchTextToWordParams($searchText);
 
 			if (strlen($searchWords) > 0) {
-				if ($params["extendedSearch"] == "true") {
+				if ($multiSearch == "true") {
 					$where[] = '(MATCH (search_text) AGAINST (\''.$searchWords.'\' IN BOOLEAN MODE) OR MATCH (search_text2) AGAINST (\''.$searchWords.'\' IN BOOLEAN MODE))';
 				} else {
 					$where[] = 'MATCH (search_text) AGAINST (\''.$searchWords.'\' IN BOOLEAN MODE)';
 				}
 			}
 
+		} else {
+			if ($hideOld === "true") {
+				$date = strtotime('-2 years');
+				$minYear = date("Y", $date);
+				$where[] = "(imdbinfo.year >= " . $minYear . ' OR imdbinfo.year IS NULL)';
+			}
+
+			if ($catStr != '') {
+				$where[] = 'category IN ('.$catStr.')';
+			}
+
+			if ($p2p === "true") {
+				$where[] = '(category IN (9,10,11,12,14) OR p2p = 1)';
+			} else if ($p2p === "false") {
+				$where[] = 'p2p = 0';
+			}
+
 		}
 
-		if ($catStr != '') {
-			$where[] = 'category IN ('.$catStr.')';
-		}
-
-		if ($params["p2p"] === "true") {
-			$where[] = 'p2p = 1';
-		} else if ($params["p2p"] === "false") {
-			$where[] = 'p2p = 0';
-		}
-
-		if ($params["swesub"] == "true") {
-			$where[] = "torrents.swesub > 0";
-		}
-
-		if ($params["sweaudio"] == "true") {
-			$where[] = "sweaudio = 1";
-		}
-
-		if ($params["freeleech"] == "true") {
-			$where[] = "frileech = 1";
-		}
-
-		if ($params["stereoscopic"] == "true") {
-			$where[] = "`3d` = 1";
-		}
-
-		if ($params["section"] == 'new') {
+		if ($section == 'new') {
 			$where[] = 'reqid = 0';
-		} else if ($params["section"] == 'archive') {
+		} else if ($section == 'archive') {
 			$where[] = 'reqid > 0';
 		}
 
-		if ($params["watchview"] === "true") {
+		if ($watch) {
 
-			$sth = $this->db->query("SELECT COUNT(*) FROM bevaka JOIN torrents on bevaka.imdbid = torrents.imdbid WHERE (((torrents.category IN(4,5,6,7)) AND torrents.pack = 0 AND bevaka.swesub = 1 AND torrents.swesub = 1) OR ((torrents.category IN(4,5,6,7)) AND bevaka.swesub = 0) OR (torrents.category NOT IN (4,5,6,7))) AND FIND_IN_SET(torrents.category, bevaka.format) AND (category = 2 AND torrents.p2p = 1 OR category <> 2 AND torrents.p2p = 0) AND torrents.pack = 0 AND torrents.3d = 0 AND bevaka.userid = " . $this->user->getId() . (count($where) > 0 ? ' AND '.implode($where, ' AND ' ) : ''));
+			$sth = $this->db->query("SELECT COUNT(*) FROM bevaka JOIN torrents on bevaka.imdbid = torrents.imdbid WHERE (((torrents.category IN(4,5,6,7)) AND torrents.pack = 0 AND bevaka.swesub = 1 AND torrents.swesub = 1) OR ((torrents.category IN(4,5,6,7)) AND bevaka.swesub = 0) OR (torrents.category NOT IN (4,5,6,7))) AND FIND_IN_SET(torrents.category, bevaka.format) AND (category = 2 AND torrents.p2p = 1 OR category <> 2 AND torrents.p2p = 0) AND torrents.pack = 0 AND torrents.3d = 0 AND bevaka.userid = " . $this->user->getId());
 			$arr = $sth->fetch();
 			$totalCount = $arr[0];
 
-			$sth = $this->db->prepare("SELECT imdbinfo.genres, imdbinfo.photo, imdbinfo.rating, imdbinfo.imdbid AS imdbid2, torrents.* FROM bevaka JOIN torrents on bevaka.imdbid = torrents.imdbid LEFT JOIN imdbinfo ON torrents.imdbid = imdbinfo.id WHERE (((torrents.category IN(4,5,6,7)) AND bevaka.swesub = 1 AND torrents.swesub = 1) OR ((torrents.category IN(4,5,6,7)) AND bevaka.swesub = 0) OR (torrents.category NOT IN (4,5,6,7))) AND FIND_IN_SET(torrents.category, bevaka.format) AND (category = 2 AND torrents.p2p = 1 OR category <> 2 AND torrents.p2p = 0) AND torrents.pack = 0 AND torrents.3d = 0 AND bevaka.userid = ? " . (count($where) > 0 ? ' AND '.implode($where, ' AND ' ) : '') ." ORDER BY ".$sortColumn." ".$order." LIMIT ?, ?");
+			$sth = $this->db->prepare("SELECT imdbinfo.genres, imdbinfo.photo, imdbinfo.rating, imdbinfo.imdbid AS imdbid2, torrents.* FROM bevaka JOIN torrents on bevaka.imdbid = torrents.imdbid LEFT JOIN imdbinfo ON torrents.imdbid = imdbinfo.id WHERE (((torrents.category IN(4,5,6,7)) AND bevaka.swesub = 1 AND torrents.swesub = 1) OR ((torrents.category IN(4,5,6,7)) AND bevaka.swesub = 0) OR (torrents.category NOT IN (4,5,6,7))) AND FIND_IN_SET(torrents.category, bevaka.format) AND (category = 2 AND torrents.p2p = 1 OR category <> 2 AND torrents.p2p = 0) AND torrents.pack = 0 AND torrents.3d = 0 AND bevaka.userid = ? ORDER BY torrents.id DESC LIMIT ?, ?");
 			$sth->bindValue(1, $this->user->getId(), PDO::PARAM_INT);
 			$sth->bindParam(2, $index, PDO::PARAM_INT);
 			$sth->bindParam(3, $limit, PDO::PARAM_INT);
@@ -619,8 +621,8 @@ class Torrent {
 		$tvEpisode = $post["tv_episode"];
 		$tvInfo = $post["tv_info"];
 
-		if ($post["category"] == Torrent::TV_SWE && $tvProgramId > 0 && $tvChannel > 0 && $tvProgramId != $torrent["tv_programid"]) {
-			/* Manual entered program */
+		/*if ($post["category"] == Torrent::TV_SWE && $tvProgramId > 0 && $tvChannel > 0 && $tvProgramId != $torrent["tv_programid"]) {
+			// Manual entered program 
 			if ($tvProgramId == 1){
 				$tvProgram = $post["programTitle"];
 				$tvTime = strtotime($post["programDate"] . ' ' . $post["programTime"]);
@@ -639,12 +641,12 @@ class Torrent {
 				$tvInfo = $sweTv["info"];
 				$tvTime = $sweTv["datum"];
 			}
-		}
+		}*/
 
 		$searchText = Helper::searchfield("$torrent[name] $imdbInfo[genres] $imdbInfo[imdbid] " . implode(" ", $packFolders));
 		$searchText2 = Helper::searchfield("$imdbInfo[director] $imdbInfo[writer] $imdbInfo[cast]");
 
-		$sth = $this->db->prepare("UPDATE torrents SET ano_owner = :anoymous, descr = :descr, category = :category, imdbid = :imdbid, swesub = :swesub, p2p = :p2p, 3d = :3d, search_text = :searchText, search_text2 = :searchText2, tv_kanalid = :tvChannel, tv_programid = :tvProgramId, tv_program = :tvProgram, tv_episode = :tvEpisode, tv_info = :tvInfo, tv_klockslag = :tvTime, reqid = :reqid, sweaudio = :sweaudio WHERE id = :id");
+		$sth = $this->db->prepare("UPDATE torrents SET ano_owner = :anoymous, descr = :descr, category = :category, imdbid = :imdbid, swesub = :swesub, p2p = :p2p, 3d = :3d, search_text = :searchText, search_text2 = :searchText2, tv_kanalid = :tvChannel, tv_programid = :tvProgramId, tv_program = :tvProgram, tv_episode = :tvEpisode, tv_info = :tvInfo, tv_klockslag = :tvTime, reqid = :reqid WHERE id = :id");
 
 		$sth->bindParam(":id",				$id,					PDO::PARAM_INT);
 		$sth->bindParam(":anoymous",		$post["ano_owner"],		PDO::PARAM_INT);
@@ -663,7 +665,6 @@ class Torrent {
 		$sth->bindParam(":tvTime",			$tvTime,				PDO::PARAM_INT);
 		$sth->bindParam(":tvProgramId",		$tvProgramId,			PDO::PARAM_INT);
 		$sth->bindParam(":reqid",			$reqid,					PDO::PARAM_INT);
-		$sth->bindParam(":sweaudio",		$post["sweaudio"],		PDO::PARAM_INT);
 
 		$sth->execute();
 
@@ -688,7 +689,7 @@ class Torrent {
 	public function upload($uploaded_file, $post) {
 
 		if ($this->user->isUploadBanned()) {
-			throw new Exception("Du är bannad ifrån att kunna ladda upp torrents.", 401);
+			throw new Exception("You can't upload torrent.", 401);
 		}
 
 		$max_torrent_size = 10000000;
@@ -696,41 +697,41 @@ class Torrent {
 
 		include('benc.php');
 
-		if ($post["category"] < 1 || $post["category"] > 15) {
-			throw new Exception('Ogiltig kategori.');
+		if ($post["category"] < 1 || $post["category"] > 8) {
+			throw new Exception('Invalid category.');
 		}
 
 		if (!preg_match("/^\d+$/", $post["reqid"])) {
-			throw new Exception('Ogiltig sektion.');
+			throw new Exception('Invalid session.');
 		}
 
 		if (!preg_match("/\.torrent$/", $uploaded_file["name"], $match)) {
-			throw new Exception('Ingen torrent-fil.');
+			throw new Exception('No torrent file.');
 		}
 
 		if (!is_uploaded_file($uploaded_file["tmp_name"])) {
-			throw new Exception('Filen kunde inte laddas upp.');
+			throw new Exception('The file could not be uploaded.');
 		}
 
 		if (!filesize($uploaded_file["tmp_name"])) {
-			throw new Exception('Filen verkar vara tom.');
+			throw new Exception('The file seems to be empty.');
 		}
 
-		if ($post["category"] == Torrent::TV_SWE && $post["reqid"] == 0 && ($post["channel"] == 0 || $post["program"] == 0)){
+		/*if ($post["category"] == Torrent::TV_SWE && $post["reqid"] == 0 && ($post["channel"] == 0 || $post["program"] == 0)){
 			throw new Exception('Du måste välja kanal och program för ny Svensk TV.');
-		}
+		}*/
 
 		if ($post["reqid"] > 2) {
 			$request = $this->requests->get($post["reqid"]);
 			if ($this->user->getId() == $request["user"]["id"]) {
-				throw new Exception("Du får inte fylla din egna request", 400);
+				throw new Exception("You may not fill your own request", 400);
 			}
 			if ($request["filled"] == 1) {
-				throw new Exception("Requesten är redan fylld.", 400);
+				throw new Exception("Request is already filled.", 400);
 			}
 		}
 
-		$name = preg_replace("/\.torrent$/", '', $uploaded_file["name"]);
+		$name = $post["torrentName"];//preg_replace("/\.torrent$/", '', $uploaded_file["name"]);
 		$category = $post["category"];
 		$reqid = $post["reqid"];
 		$anonymousUpload = $post["anonymousUpload"];
@@ -738,9 +739,19 @@ class Torrent {
 		$imdbId = $post["imdbId"];
 		$p2p = $post["p2p"];
 		$freeleech = 0;
-		$sweaudio = $post["sweaudio"] ?: 0;
 		$stereoscopic = 0;
-
+		//
+		$NfoFile = "";
+		if($_FILES['NfoFile'] && $_FILES['NfoFile']['tmp_name']){
+			$NfoFile = file_get_contents($_FILES['NfoFile']['tmp_name']);
+		}
+		$tvdbId=$post["tvdbId"];
+		$techInfo=$post["techInfo"];
+		$Origin=$post["Origin"];
+		$Mediums=$post["Mediums"];
+		$Codecs=$post["Codecs"];
+		$AniDBID=$post["AniDBID"];
+		//
 		$swesub = 0;
 		/* The following categories should always be tagged with "has swesub" */
 		if (in_array($category, array(
@@ -763,17 +774,6 @@ class Torrent {
 			$swesub = 2;
 		}
 
-		/* SWE TV is excepted from swe audio tag */
-		if ($post["sweaudio"] && in_array($category, array(
-				Torrent::TV_SWE,
-				Torrent::AUDIOBOOKS,
-				Torrent::EBOOKS,
-				Torrent::EPAPERS,
-				Torrent::MUSIC,
-				Torrent::SUBPACK))) {
-			$sweaudio = 0;
-		}
-
 		/* SWE-TV */
 		$tvProgramId = $post["program"] ?: 0;
 		$tvChannel = $post["channel"] ?: 0;
@@ -782,8 +782,8 @@ class Torrent {
 		$tvInfo = '';
 		$tvTime = 0;
 
-		if ($category == Torrent::TV_SWE && $tvProgramId > 0 && $tvChannel > 0) {
-			/* Manual entered program */
+		/*if ($category == Torrent::TV_SWE && $tvProgramId > 0 && $tvChannel > 0) {
+			// Manual entered program
 			if ($tvProgramId == 1){
 				$tvProgram = $post["programTitle"];
 				$tvTime = strtotime($post["programDate"]);
@@ -802,41 +802,41 @@ class Torrent {
 				$tvInfo = $sweTv["info"];
 				$tvTime = $sweTv["datum"];
 			}
-		}
+		}*/
 
 
 		if ($this->user->getClass() < User::CLASS_UPLOADER && $reqid == 0) {
-			throw new Exception('Bara uppladdare kan ladda upp på nytt.');
+			throw new Exception('Only chargers can recharge.');
 		}
 
 		$sth = $this->db->prepare("SELECT COUNT(*) FROM torrents WHERE name = ?");
 		$sth->execute(Array($name));
 		$arr = $sth->fetch();
 		if ($arr[0] == 1) {
-			throw new Exception('Dublett. Releasen finns redan på sidan.');
+			throw new Exception('Duplicate. The torrent with the same name is already uploaded.');
 		}
 
 		$sth = $this->db->prepare("SELECT COUNT(*) FROM packfiles WHERE filename = ?");
 		$sth->execute(Array($name));
 		$arr = $sth->fetch();
 		if ($arr[0] == 1) {
-			throw new Exception('Dublett. Releasen finns redan inuti ett pack.');
+			throw new Exception('Duplicate. The release is already inside a pack.');
 		}
 
 		$sth = $this->db->prepare("SELECT comment FROM banned WHERE namn = ?");
 		$sth->execute(Array($name));
 		while ($arr = $sth->fetch(PDO::FETCH_ASSOC)) {
-			throw new Exception('Releasen är bannad med anledning: ' . $arr["comment"]);
+			throw new Exception('The release is banned with reason: ' . $arr["comment"]);
 		}
 
 		$dict = bdec_file($uploaded_file["tmp_name"], $max_torrent_size);
 		if (!isset($dict)) {
-			throw new Exception('Fel på .torrent-filen.');
+			throw new Exception('Failure of .torrent files.');
 		}
 
 		function dict_check($d, $s) {
 			if ($d["type"] != "dictionary") {
-				throw new Exception("Filen är inte en torrent-fil");
+				throw new Exception("The file is not a torrent file.");
 			}
 			$a = explode(":", $s);
 			$dd = $d["value"];
@@ -849,7 +849,7 @@ class Torrent {
 				}
 				if (isset($t)) {
 					if ($dd[$k]["type"] != $t) {
-						throw new Exception("Torrent-filen saknar troligtvis announce/tracker url.");
+						throw new Exception("Torrent file lacks probably announce / tracker URL.");
 					}
 					$ret[] = $dd[$k]["value"];
 				}
@@ -861,14 +861,14 @@ class Torrent {
 
 		function dict_get($d, $k, $t) {
 			if ($d["type"] != "dictionary") {
-				throw new Exception("Fel på torrent-fil.");
+				throw new Exception("Failure of .torrent files.");
 			}
 			$dd = $d["value"];
 			if (!isset($dd[$k]))
 				return;
 			$v = $dd[$k];
 			if ($v["type"] != $t) {
-				throw new Exception("Fel på torrent-fil.");
+				throw new Exception("Failure of .torrent files.");
 			}
 			return $v["value"];
 		}
@@ -889,10 +889,10 @@ class Torrent {
 		else {
 			$flist = dict_get($info, "files", "list");
 			if (!isset($flist)) {
-				throw new Exception("Saknar både längd och filer.");
+				throw new Exception("Lacks both length and files.");
 			}
 			if (!count($flist)) {
-				throw new Exception("Torrent saknar filer.");
+				throw new Exception("Torrent missing files.");
 			}
 			$totallen = 0;
 			foreach ($flist as $fn) {
@@ -901,12 +901,12 @@ class Torrent {
 				$ffa = array();
 				foreach ($ff as $ffe) {
 					if ($ffe["type"] != "string"){
-						throw new Exception("Fel på filnamn.");
+						throw new Exception("Error in file names.");
 					}
 					$ffa[] = $ffe["value"];
 				}
 				if (!count($ffa)) {
-					throw new Exception("Fel på filnamn.");
+					throw new Exception("Error in file names.");
 				}
 				$ffe = implode("/", $ffa);
 				$filelist[] = array($ffe, $ll);
@@ -931,13 +931,13 @@ class Torrent {
 			foreach($foundBanned as $f)
 				$files .= '\''.$f. '\', ';
 
-			$this->adminlog->create("[b]".$this->user->getUsername()."[/b] försökte ladda upp [i]".$name."[/i] innehållandes otllåtna skräpfil(er): [b]".$files."[/b].");
-			throw new Exception("Din torrent innehåller följande otillåtna skräpfiler: [b]".$files);
+			$this->adminlog->create("[b]".$this->user->getUsername()."[/b] trying to upload [i]".$name."[/i] contains the following unauthorized junk files: [b]".$files."[/b].");
+			throw new Exception("Your torrent contains the following unauthorized junk files: [b]".$files."[/b].");
 		}
 
 		if(($txt = $this->detectMissingFiles($filelist)) != false) {
-			$this->adminlog->create('[b]'.$this->user->getUsername().'[/b] försökte ladda upp [i]'.$name.'[/i] men: ' . $txt);
-			throw new Exception("Fattas filer i torrent: " . $txt);
+			$this->adminlog->create('[b]'.$this->user->getUsername().'[/b] trying to upload [i]'.$name.'[/i] but: ' . $txt);
+			throw new Exception("Missing files in the torrent: " . $txt);
 		}
 
 		$info['value']['source']['type'] = "string";
@@ -957,7 +957,7 @@ class Torrent {
 		$sth->execute();
 		$arr = $sth->fetch();
 		if ($arr[0] == 1) {
-			throw new Exception('Dublett. Releasen finns redan på sidan.');
+			throw new Exception('Duplicate. The same torrent is already uploaded.');
 		}
 
 		$pre = Helper::preCheck($name);
@@ -970,9 +970,9 @@ class Torrent {
 			/* Use pre-time to determine New or Archive section */
 			if ($reqid == 1 && $pre > time() - 604800) {
 				$reqid = 0;
-				$this->adminlog->create("[b]".$this->user->getUsername()."[/b] laddade upp [i]'".$name."'[/i] på Arkiv men PRE-tid säger under 7 dagar, auto-flyttar till Nytt.");
+				$this->adminlog->create("[b]".$this->user->getUsername()."[/b] uploaded [i]'".$name."'[/i] but PRE-time saying for 7 days, auto-move to New.");
 			} else if ($reqid == 0 && time() - $pre > 604800) {
-				$this->adminlog->create("[b]".$this->user->getUsername()."[/b] laddade upp [i]'".$name."'[/i] på Nytt men PRE-tid säger över 7 dagar, auto-flyttar till Arkiv.");
+				$this->adminlog->create("[b]".$this->user->getUsername()."[/b] laddade upp [i]'".$name."'[/i] New, but PRE-time says over 7 days, auto-move to Archive.");
 				$reqid = 1;
 			}
 		}
@@ -1004,7 +1004,7 @@ class Torrent {
 		$res = $sth->fetch(PDO::FETCH_ASSOC);
 		if ($res) {
 			if ($res["whitelist"] == 0) {
-				throw new Exception("Release-gruppen är bannad med anledningen: " . $res["comment"], 401);
+				throw new Exception("Release group is banned by reason: " . $res["comment"], 401);
 			} else {
 				$p2p = 1;
 			}
@@ -1044,7 +1044,7 @@ class Torrent {
 		$searchText = Helper::searchfield("$name $imdbInfo[genres] $imdbInfo[imdbid] " . implode(" ", $packFolders));
 		$searchText2 = Helper::searchfield("$imdbInfo[director] $imdbInfo[writer] $imdbInfo[cast]");
 
-		$sth = $this->db->prepare("INSERT INTO torrents (name, filename, search_text, search_text2, owner, visible, info_hash, size, numfiles, type, ano_owner, descr, category, added, last_action,  frileech, tv_kanalid, tv_program, tv_episode, tv_info, imdbid, tv_klockslag, tv_programid, reqid, pre, p2p, 3d, pack, swesub, sweaudio) VALUES (:name, :filename, :searchText, :searchText2, :owner, 'no', :infoHash, :size, :numfiles, :type, :anoymous, :descr, :category, NOW(), NOW(), :freeLeech, :tvChannel, :tvProgram, :tvEpisode, :tvInfo, :imdbid, :tvTime, :tvProgramId, :reqid, :pre, :p2p, :3d, :pack, :swesub, :sweaudio)");
+		$sth = $this->db->prepare("INSERT INTO torrents (name, filename, search_text, search_text2, owner, visible, info_hash, size, numfiles, type, ano_owner, descr, category, added, last_action,  frileech, tv_kanalid, tv_program, tv_episode, tv_info, imdbid, tv_klockslag, tv_programid, reqid, pre, p2p, 3d, pack, swesub, Codec, Medium, Origin, NfoFile, MediaInfo, TVDBID, AniDBID) VALUES (:name, :filename, :searchText, :searchText2, :owner, 'no', :infoHash, :size, :numfiles, :type, :anoymous, :descr, :category, NOW(), NOW(), :freeLeech, :tvChannel, :tvProgram, :tvEpisode, :tvInfo, :imdbid, :tvTime, :tvProgramId, :reqid, :pre, :p2p, :3d, :pack, :swesub ,:Codec, :Medium,:Origin, :NfoFile, :MediaInfo, :TVDBID, :AniDBID)");
 
 		$sth->bindParam(":name",			$name, 					PDO::PARAM_STR);
 		$sth->bindParam(":filename",		$fname,					PDO::PARAM_STR);
@@ -1072,8 +1072,15 @@ class Torrent {
 		$sth->bindParam(":3d",				$stereoscopic,			PDO::PARAM_INT);
 		$sth->bindParam(":pack",			$pack,					PDO::PARAM_INT);
 		$sth->bindParam(":swesub",			$swesub,				PDO::PARAM_INT);
-		$sth->bindParam(":sweaudio",		$sweaudio,				PDO::PARAM_INT);
-
+//
+		$sth->bindParam(":Codec",			$Codecs,				PDO::PARAM_INT);
+		$sth->bindParam(":Medium",			$Mediums,				PDO::PARAM_INT);
+		$sth->bindParam(":Origin",			$Origin,				PDO::PARAM_INT);
+		$sth->bindParam(":NfoFile",			$NfoFile,				PDO::PARAM_STR);
+		$sth->bindParam(":MediaInfo",		$techInfo,				PDO::PARAM_STR);
+		$sth->bindParam(":TVDBID",			$tvdbId,				PDO::PARAM_STR);
+		$sth->bindParam(":AniDBID",			$AniDBID,				PDO::PARAM_STR);
+//
 		$sth->execute();
 
 		$insertId = $this->db->lastInsertId();
@@ -1114,15 +1121,15 @@ class Torrent {
 			if ($anonymousUpload) {
 				$uploader = "[i]Anonym[/i]";
   			}
-			$message = "Requesten [url=/torrent/" . $insertId . "/".$name."][b]".$name."[/b][/url] har blivit uppladdad av " . $uploader;
+			$message = "Request [url=/torrent/" . $insertId . "/".$name."][b]".$name."[/b][/url] was filled by " . $uploader;
   			foreach ($votes as $vote) {
   				if ($vote["user"]["id"] !== $this->user->getId()) {
-  					$this->mailbox->sendSystemMessage($vote["user"]["id"], "Request uppladdad!", $message);
+  					$this->mailbox->sendSystemMessage($vote["user"]["id"], "Request uploaded!", $message);
   				}
 			}
 		}
 
-		$this->log->log(1, "Torrent ([url=/torrent/" . $insertId . "/".$name."][b]".$name."[/b][/url]) laddades upp utav {{username}}", $this->user->getId(), $anonymousUpload);
+		$this->log->log(1, "Torrent ([url=/torrent/" . $insertId . "/".$name."][b]".$name."[/b][/url]) uploaded by {{username}}", $this->user->getId(), $anonymousUpload);
 
 		/* Flush memcached */
 		if ($memcached && $category == 8) {
