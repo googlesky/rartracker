@@ -51,11 +51,11 @@
 	};
 
 
-	
-	function AppConfig($stateProvider, $urlRouterProvider, $locationProvider, $compileProvider) {
+	function AppConfig($stateProvider, $urlRouterProvider, $locationProvider, $compileProvider, $httpProvider) {
 		$compileProvider.debugInfoEnabled(true);
 		$urlRouterProvider.otherwise('/');
 		$locationProvider.html5Mode(true);
+		$httpProvider.useApplyAsync(true);
 	}
 
 	function ResourceExtension($resource, configs) {
